@@ -6,6 +6,8 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
+    def __str__(self):
+        return f"{self.value}"
 
 
 # Hash table can't have fewer than this many slots
@@ -22,6 +24,11 @@ class HashTable:
 
     def __init__(self, capacity):
         # Your code here
+        if capacity >= MIN_CAPACITY:
+            self.capacity = capacity
+        else:
+            self.capacity = MIN_CAPACITY
+        self.entry = [None] * self.capacity
 
 
     def get_num_slots(self):
@@ -34,6 +41,7 @@ class HashTable:
 
         Implement this.
         """
+        return self.capacity
         # Your code here
 
 
@@ -44,6 +52,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return len(self.entry) / self.capacity
 
 
     def fnv1(self, key):
@@ -63,6 +72,11 @@ class HashTable:
         Implement this, and/or FNV-1.
         """
         # Your code here
+        hash = 5381
+        for letter in key:
+            hash = ((hash * 33) + hash + ord(letter))
+        
+        return (hash & 0xFFFFFFFF)
 
 
     def hash_index(self, key):
@@ -82,6 +96,10 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        hash = self.djb2(key)
+        modded = hash % self.capacity
+        self.entry[modded] = HashTableEntry(key, value)
+
 
 
     def delete(self, key):
@@ -93,6 +111,12 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        hash = self.djb2(key)
+        modded = hash % self.capacity
+        if self.entry[modded] is None:
+            print("Invalid key. Please input a valid entry.")
+        else:
+            self.entry[modded] = None
 
 
     def get(self, key):
@@ -104,6 +128,12 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        hash = self.djb2(key)
+        modded = hash % self.capacity
+        if self.entry[modded] is not None:
+            return f"{self.entry[modded]}"
+        else:
+            return self.entry[modded]
 
 
     def resize(self, new_capacity):
