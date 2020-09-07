@@ -113,11 +113,12 @@ class HashTable:
         if self.entries[hash_index] != None:
             cur_node = self.entries[hash_index]
             if cur_node.key == key:
-                cur_node = HashTableentries(key, value, cur_node.next)
+                self.entries[hash_index] = HashTableentries(key, value, cur_node.next)
             else:
                 while cur_node.next is not None:
                     if cur_node.next.key == key:
                         cur_node.next = HashTableentries(key, value, cur_node.next)
+                        return
                     else:
                         cur_node = cur_node.next
                 cur_node.next = HashTableentries(key, value)
