@@ -1,11 +1,13 @@
-class HashTableEntry:
+class HashTableentries:
     """
     Linked List hash table key/value pair
     """
-    def __init__(self, key, value):
+
+    def __init__(self, key, value, next=None):
         self.key = key
         self.value = value
-        self.next = None
+        self.next = next
+
     def __str__(self):
         return f"{self.value}"
 
@@ -28,8 +30,7 @@ class HashTable:
             self.capacity = capacity
         else:
             self.capacity = MIN_CAPACITY
-        self.entry = [None] * self.capacity
-
+        self.entries = [None] * self.capacity
 
     def get_num_slots(self):
         """
@@ -44,7 +45,6 @@ class HashTable:
         return self.capacity
         # Your code here
 
-
     def get_load_factor(self):
         """
         Return the load factor for this hash table.
@@ -52,8 +52,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return len(self.entry) / self.capacity
-
+        return len(self.entries) / self.capacity
 
     def fnv1(self, key):
         """
@@ -63,7 +62,21 @@ class HashTable:
         """
 
         # Your code here
+    # algorithm fnv-1 is
+        # hash := FNV_offset_basis do
+        # for each byte_of_data to be hashed
+        #     hash := hash × FNV_prime
+        #     hash := hash XOR byte_of_data
+        # return hash
+        FNV_offset_basis = 14695981039346656037
+        FNV_prime = 1099511628211
 
+        hashed = FNV_offset_basis
+        key_bytes = key.encode()
+        for byte in key_bytes:
+            hashed = hashed * FNV_prime
+            hashed = hashed ^ byte
+        return hashed
 
     def djb2(self, key):
         """
@@ -75,16 +88,16 @@ class HashTable:
         hash = 5381
         for letter in key:
             hash = ((hash * 33) + hash + ord(letter))
-        
-        return (hash & 0xFFFFFFFF)
 
+        return (hash & 0xFFFFFFFF)
+        # 0xFFFFFFFF means only return left 8 digits
 
     def hash_index(self, key):
         """
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -96,11 +109,20 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        hash = self.djb2(key)
-        modded = hash % self.capacity
-        self.entry[modded] = HashTableEntry(key, value)
-
-
+        hash_index = self.hash_index(key)
+        if self.entries[hash_index] != None:
+            cur_node = self.entries[hash_index]
+            if cur_node.key == key:
+                cur_node = HashTableentries(key, value, cur_node.next)
+            else:
+                while cur_node.next is not None:
+                    if cur_node.next.key == key:
+                        cur_node.next = HashTableentries(key, value, cur_node.next)
+                    else:
+                        cur_node = cur_node.next
+                cur_node.next = HashTableentries(key, value)
+        else:
+            self.entries[hash_index] = HashTableentries(key, value)
 
     def delete(self, key):
         """
@@ -113,11 +135,16 @@ class HashTable:
         # Your code here
         hash = self.djb2(key)
         modded = hash % self.capacity
-        if self.entry[modded] is None:
+        if self.entries[modded] is None:
             print("Invalid key. Please input a valid entry.")
         else:
-            self.entry[modded] = None
-
+            cur_node = self.entries[modded]
+            while cur_node is not None:
+                if cur_node.key == key:
+                    cur_node.value = None
+                    return
+                else:
+                    cur_node = cur_node.next
 
     def get(self, key):
         """
@@ -130,11 +157,24 @@ class HashTable:
         # Your code here
         hash = self.djb2(key)
         modded = hash % self.capacity
-        if self.entry[modded] is not None:
-            return f"{self.entry[modded]}"
+        if self.entries[modded] is not None:
+            if self.entries[modded].key == key:
+                if self.entries[modded].value is not None:
+                    return f"{self.entries[modded]}"
+                else:
+                    return None
+            else:
+                cur_node = self.entries[modded]
+                while cur_node is not None:
+                    if cur_node.key == key:
+                        if cur_node.value is not None:
+                            return f"{cur_node}"
+                        else:
+                            return None
+                    else:
+                        cur_node = cur_node.next
         else:
-            return self.entry[modded]
-
+            return None
 
     def resize(self, new_capacity):
         """
@@ -144,7 +184,6 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
 
 
 if __name__ == "__main__":
