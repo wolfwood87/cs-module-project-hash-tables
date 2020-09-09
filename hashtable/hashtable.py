@@ -31,6 +31,7 @@ class HashTable:
         else:
             self.capacity = MIN_CAPACITY
         self.entries = [None] * self.capacity
+        self.count = 0
 
     def get_num_slots(self):
         """
@@ -52,7 +53,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return len(self.entries) / self.capacity
+        return self.count / self.capacity
 
     def fnv1(self, key):
         """
@@ -110,6 +111,7 @@ class HashTable:
         """
         # Your code here
         hash_index = self.hash_index(key)
+        self.count += 1
         if self.entries[hash_index] != None:
             cur_node = self.entries[hash_index]
             if cur_node.key == key:
@@ -118,12 +120,16 @@ class HashTable:
                 while cur_node.next is not None:
                     if cur_node.next.key == key:
                         cur_node.next = HashTableentries(key, value, cur_node.next)
+                        if self.get_load_factor() >= .7:
+                            self.resize(self.capacity * 2)
                         return
                     else:
                         cur_node = cur_node.next
                 cur_node.next = HashTableentries(key, value)
         else:
             self.entries[hash_index] = HashTableentries(key, value)
+        if self.get_load_factor() >= .7:
+            self.resize(self.capacity * 2)
 
     def delete(self, key):
         """
@@ -189,12 +195,13 @@ class HashTable:
         new_entries = self.entries
         self.entries = [None] * self.capacity
         for item in new_entries:
-            if item.next is not None:
-                cur_node = item.next
-                while cur_node is not None:
-                    self.put(cur_node.key, cur_node.value)
-                    cur_node = cur_node.next
-            self.put(item.key, item.value)
+            if item is not None:
+                if item.next is not None:
+                    cur_node = item.next
+                    while cur_node is not None:
+                        self.put(cur_node.key, cur_node.value)
+                        cur_node = cur_node.next
+                self.put(item.key, item.value)
             
 
 
