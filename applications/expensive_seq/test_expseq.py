@@ -2,7 +2,6 @@ import unittest
 
 from expensive_seq import expensive_seq
 
-
 class TestHashTable(unittest.TestCase):
 
     def test_expseq(self):
@@ -18,3 +17,4 @@ class TestHashTable(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
