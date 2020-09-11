@@ -1,5 +1,17 @@
+import re
+
 def word_count(s):
+    hash_count = {}
     # Your code here
+    words = s.split()
+    for word in words:
+        word = re.sub("[^A-Za-z0-9']+", '', word)
+        lower = word.lower()
+        if f"{lower}" in hash_count:
+            hash_count[f"{lower}"] += 1
+        elif word != "":
+            hash_count[f"{lower}"] = 1
+    return hash_count
 
 
 
